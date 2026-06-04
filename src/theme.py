@@ -17,9 +17,9 @@ KAPPO_CSS = """
             #f6f8f5;
     }
     .main .block-container {
-        padding-top: 1.8rem;
+        padding-top: 1.55rem;
         padding-bottom: 2rem;
-        max-width: 1440px;
+        max-width: 1360px;
     }
 
     [data-testid="stSidebar"] {
@@ -43,17 +43,18 @@ KAPPO_CSS = """
     .kappo-banner {
         background: linear-gradient(135deg, #2d5016 0%, #4a7c2a 100%);
         color: white;
-        padding: 2rem 2.2rem;
-        border-radius: 14px;
-        margin-bottom: 1.35rem;
-        box-shadow: 0 18px 34px rgba(45, 80, 22, 0.24);
+        padding: 2.15rem 2.35rem;
+        border-radius: 16px;
+        margin-bottom: 1.55rem;
+        box-shadow: 0 20px 38px rgba(30, 55, 18, 0.26);
         border-bottom: 5px solid rgba(232, 244, 220, 0.85);
     }
     .kappo-banner h1 {
         color: white !important;
         margin: 0;
-        font-size: 1.9rem;
+        font-size: 2.05rem;
         font-weight: 850;
+        letter-spacing: 0;
     }
     .kappo-banner p {
         margin: 0.65rem 0 0 0;
@@ -64,9 +65,15 @@ KAPPO_CSS = """
         color: #2c3e50;
         font-size: 1.28rem;
         font-weight: 750;
-        margin: 1.45rem 0 0.85rem 0;
+        margin: 1.65rem 0 0.75rem 0;
         padding-bottom: 0.35rem;
         border-bottom: 2px solid #4a7c2a;
+    }
+    .section-helper {
+        color: #647067;
+        font-size: 0.92rem;
+        margin: -0.35rem 0 0.95rem 0;
+        line-height: 1.38;
     }
     .status-pill {
         display: inline-block;
@@ -80,11 +87,12 @@ KAPPO_CSS = """
         margin-left: 0.35rem;
     }
     [data-testid="stMetricContainer"] {
-        background: linear-gradient(135deg, #ffffff 0%, #eef3f8 100%);
+        background: linear-gradient(135deg, #ffffff 0%, #f6faf4 100%);
         padding: 1rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
-        border: 1px solid #dde5ee;
+        border-radius: 12px;
+        box-shadow: 0 10px 22px rgba(31, 41, 51, 0.07);
+        border: 1px solid #d9e9cd;
+        border-left: 5px solid #4a7c2a;
     }
     [data-testid="stMetricLabel"] {
         font-weight: 700;
@@ -93,6 +101,14 @@ KAPPO_CSS = """
     [data-testid="stMetricValue"] {
         color: #1f3a0f;
         font-weight: 800;
+        letter-spacing: 0;
+    }
+    [data-testid="stSelectbox"] {
+        background: #ffffff;
+        border: 1px solid #dde8d5;
+        border-radius: 12px;
+        padding: 0.45rem 0.6rem 0.65rem 0.6rem;
+        box-shadow: 0 8px 18px rgba(31, 41, 51, 0.05);
     }
     .stButton > button {
         border-radius: 8px;
@@ -112,35 +128,36 @@ KAPPO_CSS = """
         box-shadow: none !important;
     }
     [data-testid="stDataFrame"] {
-        border: 1px solid #dde5ee;
-        border-radius: 8px;
+        border: 1px solid #dbe7d4;
+        border-radius: 12px;
         overflow: hidden;
+        box-shadow: 0 8px 18px rgba(31, 41, 51, 0.05);
     }
     .comparison-card {
-        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-        border: 1px solid #d7e1ea;
-        border-left: 5px solid #4a7c2a;
-        border-radius: 8px;
-        padding: 1.05rem 1.1rem;
-        min-height: 260px;
-        box-shadow: 0 8px 18px rgba(31, 41, 51, 0.08);
+        background: linear-gradient(180deg, #ffffff 0%, #fbfdf9 100%);
+        border: 1px solid #d8e7cf;
+        border-left: 6px solid #4a7c2a;
+        border-radius: 14px;
+        padding: 1.15rem 1.2rem;
+        min-height: 252px;
+        box-shadow: 0 14px 28px rgba(31, 41, 51, 0.09);
         margin-bottom: 1.15rem;
         overflow: visible;
     }
     .comparison-card-title {
         color: #203047;
-        font-size: 1.02rem;
+        font-size: 1.08rem;
         font-weight: 850;
-        margin-bottom: 0.85rem;
+        margin-bottom: 0.95rem;
         line-height: 1.25;
     }
     .comparison-period-block {
         display: grid;
         grid-template-columns: 1fr;
         gap: 0.35rem;
-        background: #f1f5f8;
-        border: 1px solid #e0e7ee;
-        border-radius: 8px;
+        background: #f5f9f2;
+        border: 1px solid #dfebd8;
+        border-radius: 10px;
         padding: 0.72rem 0.8rem;
         margin-bottom: 0.65rem;
     }
@@ -169,7 +186,7 @@ KAPPO_CSS = """
     }
     .comparison-main-value {
         color: #1f3a0f;
-        font-size: 1.24rem;
+        font-size: 1.32rem;
         font-weight: 900;
         line-height: 1.2;
         word-break: keep-all;
@@ -213,9 +230,9 @@ KAPPO_CSS = """
         background: #ffffff;
         border: 1px solid #dde5ee;
         border-radius: 12px;
-        box-shadow: 0 12px 26px rgba(31, 41, 51, 0.08);
+        box-shadow: 0 14px 28px rgba(31, 41, 51, 0.08);
         padding: 1.25rem 1.35rem;
-        margin-bottom: 1.15rem;
+        margin-bottom: 1.25rem;
     }
     .executive-card {
         background: linear-gradient(180deg, #ffffff 0%, #f9fcf7 100%);
@@ -224,7 +241,7 @@ KAPPO_CSS = """
     .executive-title,
     .ranking-title {
         color: #203047;
-        font-size: 1.16rem;
+        font-size: 1.2rem;
         font-weight: 850;
         margin-bottom: 0.25rem;
     }
@@ -323,10 +340,10 @@ KAPPO_CSS = """
         margin-top: 0.42rem;
     }
     .executive-conclusion {
-        background: #eef6e9;
+        background: #edf7e7;
         border: 1px solid #d6e9c8;
         border-radius: 8px;
-        padding: 0.8rem 0.9rem;
+        padding: 0.9rem 1rem;
         color: #244414;
         line-height: 1.35;
     }
@@ -399,19 +416,19 @@ KAPPO_CSS = """
         background: #eef6e9;
         border: 1px solid #cfe5bf;
         color: #244414;
-        border-radius: 8px;
-        padding: 0.9rem 1rem;
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
         box-shadow: 0 5px 14px rgba(31, 41, 51, 0.05);
         font-weight: 720;
         margin-bottom: 1rem;
     }
     .ai-analysis-card {
         background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
-        border: 1px solid #d7e1ea;
-        border-left: 5px solid #4a7c2a;
-        border-radius: 8px;
-        padding: 1.15rem 1.25rem;
-        box-shadow: 0 8px 18px rgba(31, 41, 51, 0.07);
+        border: 1px solid #d8e7cf;
+        border-left: 6px solid #4a7c2a;
+        border-radius: 14px;
+        padding: 1.25rem 1.35rem;
+        box-shadow: 0 14px 28px rgba(31, 41, 51, 0.08);
         margin: 0.8rem 0 1rem 0;
     }
     .ai-analysis-title {
@@ -464,19 +481,19 @@ KAPPO_CSS = """
         border-collapse: separate;
         border-spacing: 0;
         overflow: hidden;
-        border-radius: 8px;
+        border-radius: 12px;
         font-size: 0.86rem;
     }
     .ranking-table th {
         background: #e8f4dc;
         color: #203047;
-        padding: 0.55rem 0.6rem;
+        padding: 0.68rem 0.72rem;
         text-align: left;
         font-weight: 850;
         border-bottom: 1px solid #d6e9c8;
     }
     .ranking-table td {
-        padding: 0.55rem 0.6rem;
+        padding: 0.64rem 0.72rem;
         border-bottom: 1px solid #edf1f5;
         color: #1f2933;
         vertical-align: top;
