@@ -1444,6 +1444,10 @@ last_kpis = latest_period_kpis(kpis)
 
 
 section_title("Tipo de comparación")
+st.markdown(
+    '<div class="section-helper">Define la base temporal que moverá las tarjetas, lectura ejecutiva, alertas y rankings.</div>',
+    unsafe_allow_html=True,
+)
 comparison_type = st.selectbox(
     "Selecciona la base de comparación para tarjetas, lectura ejecutiva, alertas y rankings",
     options=list(COMPARISON_TYPES.keys()),
@@ -1475,6 +1479,10 @@ else:
 
 
 section_title("Resumen ejecutivo financiero")
+st.markdown(
+    '<div class="section-helper">Vista gerencial de los principales indicadores para la comparación seleccionada.</div>',
+    unsafe_allow_html=True,
+)
 if comparison_context.get("available"):
     _render_comparison_cards(comparison_values)
 else:
@@ -1484,6 +1492,10 @@ else:
 _render_executive_reading_card(lectura_ejecutiva, comparison_context, comparison_values)
 
 section_title("Alertas financieras")
+st.markdown(
+    '<div class="section-helper">Controles simples para detectar señales relevantes de margen, gasto, ingresos y resultado.</div>',
+    unsafe_allow_html=True,
+)
 _render_alert_cards(alertas_financieras)
 
 
@@ -1501,7 +1513,7 @@ else:
         <div class="blocked-action-card">
             <div class="blocked-action-title">Análisis Kappo disponible</div>
             <div class="blocked-action-text">
-                El informe integrado usará Estado de Resultados, Balance Clasificado, conciliación vigente e indicadores crediticios preliminares.
+                El informe integrado usará el Estado de Resultados, el Balance Clasificado, la conciliación vigente e indicadores crediticios preliminares.
             </div>
         </div>
         """,
@@ -1622,6 +1634,10 @@ with st.expander("Resumen fijo del último período", expanded=False):
 
 
 section_title("Gráficos evolutivos")
+st.markdown(
+    '<div class="section-helper">Tendencia mensual de ingresos, margen, resultado y gastos administrativos.</div>',
+    unsafe_allow_html=True,
+)
 if kpis.empty:
     st.info("No hay datos suficientes para graficar.")
 elif st_echarts is None:
@@ -1643,6 +1659,10 @@ else:
 
 
 section_title("Histórico mensual completo")
+st.markdown(
+    '<div class="section-helper">Detalle evolutivo de KPIs calculados desde la base vigente.</div>',
+    unsafe_allow_html=True,
+)
 if kpis.empty:
     st.info("No hay tabla evolutiva disponible.")
 else:
@@ -1650,6 +1670,10 @@ else:
 
 
 section_title("Ranking de variación")
+st.markdown(
+    '<div class="section-helper">Cuentas detalle con mayores movimientos positivos y negativos según la comparación seleccionada.</div>',
+    unsafe_allow_html=True,
+)
 if comparison_context.get("available"):
     st.caption(
         f"{comparison_context['label']}: "
@@ -1666,6 +1690,10 @@ with rank_col2:
 
 
 section_title("Exportar análisis")
+st.markdown(
+    '<div class="section-helper">Descarga una versión auditable del análisis financiero evolutivo.</div>',
+    unsafe_allow_html=True,
+)
 try:
     export_bytes = _build_export_workbook_compatible(
         base_normalizada=base_analisis,
