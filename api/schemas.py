@@ -38,6 +38,18 @@ class AgentResult(BaseModel):
     status: Literal["not_requested", "not_configured"]
 
 
+class ReconciliationResult(BaseModel):
+    required: bool
+    original_status: Literal["OK", "REVISAR"]
+    adjusted_status: Literal["OK", "REVISAR"] | None = None
+    pending_count: int
+    applied_count: int
+    can_apply_all: bool
+    source_base: Literal["Base_normalizada", "Base_ajustada"]
+    differences: list[dict[str, Any]] = Field(default_factory=list)
+    applied_adjustments: list[dict[str, Any]] = Field(default_factory=list)
+
+
 class AnalyzeResponse(BaseModel):
     request_id: str
     status: Literal["ok", "review_required"]
@@ -48,4 +60,5 @@ class AnalyzeResponse(BaseModel):
     comparison: dict[str, Any]
     balance_kpis: dict[str, Any]
     credit_kpis: dict[str, Any]
+    reconciliation: ReconciliationResult
     agent: AgentResult
