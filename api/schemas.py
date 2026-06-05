@@ -35,7 +35,22 @@ class ValidationResult(BaseModel):
 
 class AgentResult(BaseModel):
     requested: bool
-    status: Literal["not_requested", "not_configured"]
+    status: Literal[
+        "not_requested",
+        "not_configured",
+        "blocked_by_validation",
+        "ok",
+        "timeout",
+        "http_error",
+        "connection_error",
+        "error",
+    ]
+    status_code: int | None = None
+    error: str | None = None
+    salud_financiera: Any | None = None
+    diagnostico: list[Any] = Field(default_factory=list)
+    recomendaciones: list[Any] = Field(default_factory=list)
+    informe: str | None = None
 
 
 class ReconciliationResult(BaseModel):

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import io
 import json
 import math
@@ -11,6 +12,7 @@ from typing import Any
 import pandas as pd
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 
+from api.n8n_client import post_analysis_to_n8n
 from api.schemas import AnalyzeResponse
 from src.adapters.kame_balance import load_kame_balance
 from src.adapters.kame_eerr import load_kame_eerr
@@ -83,7 +85,7 @@ async def analyze(
     if base_balance.empty:
         raise HTTPException(status_code=422, detail="El Balance no generó registros.")
 
-    return _build_analysis_response(
+    return await _build_analysis_response(
         base_eerr=base_eerr,
         eerr_diagnostics=eerr_diagnostics,
         base_balance=base_balance,
@@ -174,7 +176,7 @@ async def reconcile(
         original_exceptions,
     )
 
-    return _build_analysis_response(
+    return await _build_analysis_response(
         base_eerr=base_adjusted,
         eerr_diagnostics=eerr_diagnostics,
         base_balance=base_balance,
@@ -191,7 +193,7 @@ async def reconcile(
     )
 
 
-def _build_analysis_response(
+async def _build_analysis_response(
     *,
     base_eerr: pd.DataFrame,
     eerr_diagnostics: dict[str, Any],
@@ -241,6 +243,43 @@ def _build_analysis_response(
     balance_status = "OK" if balance_control.get("cuadra_balance") else "REVISAR"
     integrated_ready = eerr_status == "OK" and balance_status == "OK"
     source_base = "Base_ajustada" if adjustments else "Base_normalizada"
+    agent_result = {
+        "requested": include_agent,
+        "status": "not_requested",
+        "status_code": None,
+        "error": None,
+        "salud_financiera": None,
+        "diagnostico": [],
+        "recomendaciones": [],
+        "informe": None,
+    }
+
+    if include_agent and not integrated_ready:
+        agent_result.update(
+            {
+                "status": "blocked_by_validation",
+                "error": (
+                    "El análisis Kappo requiere que EERR y Balance "
+                    "se encuentren validados."
+                ),
+            }
+        )
+    elif include_agent:
+        n8n_payload = _build_n8n_payload(
+            eerr_filename=eerr_filename,
+            comparison_context=comparison_context,
+            comparison=comparison,
+            source_base=source_base,
+            adjustments=adjustments,
+            eerr_summary=current_summary,
+            balance_control=balance_control,
+            balance_kpis=balance_kpis,
+            credit_kpis=credit_kpis,
+        )
+        agent_result = await asyncio.to_thread(
+            post_analysis_to_n8n,
+            _json_safe(n8n_payload),
+        )
 
     result = {
         "request_id": str(uuid.uuid4()),
@@ -283,12 +322,46 @@ def _build_analysis_response(
             "differences": _reconciliation_differences(current_exceptions),
             "applied_adjustments": adjustments,
         },
-        "agent": {
-            "requested": include_agent,
-            "status": "not_configured" if include_agent else "not_requested",
-        },
+        "agent": agent_result,
     }
     return AnalyzeResponse.model_validate(_json_safe(result))
+
+
+def _build_n8n_payload(
+    *,
+    eerr_filename: str,
+    comparison_context: dict[str, Any],
+    comparison: dict[str, Any],
+    source_base: str,
+    adjustments: list[dict[str, Any]],
+    eerr_summary: dict[str, Any],
+    balance_control: dict[str, Any],
+    balance_kpis: dict[str, Any],
+    credit_kpis: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "origen": "dashboard_evolutivo_financiero_kappo_api",
+        "nombre_archivo": eerr_filename,
+        "tipo_comparacion": comparison_context.get("label"),
+        "enfoque_analisis": "Ejecutivo general",
+        "fuente_base": source_base,
+        "ajustes_aplicados": len(adjustments),
+        "balance_disponible": bool(balance_kpis),
+        "balance_kpis": balance_kpis,
+        "credit_kpis": credit_kpis,
+        "control_balance": balance_control,
+        "periodo_base": comparison_context.get("periodo_inicial"),
+        "periodo_actual": comparison_context.get("periodo_final"),
+        "control_cuadratura": eerr_summary,
+        "kpis": {
+            "base": comparison.get("initial", {}),
+            "actual": comparison.get("final", {}),
+            "variacion": comparison.get("delta", {}),
+            "variacion_margen_pp": comparison.get("margin_delta_pp"),
+        },
+        "alertas": [],
+        "lectura_ejecutiva_actual": [],
+    }
 
 
 def _validate_parameters(
