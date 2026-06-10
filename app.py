@@ -789,7 +789,7 @@ def _insight_topic(insight):
     return "Observación"
 
 
-def _render_executive_reading_card(insights, context, comparison):
+def _render_executive_reading_card(insights, context, comparison, alerts=None):
     subtitle = _comparison_subtitle(context)
     clean_insights = [
         str(insight)
@@ -803,7 +803,7 @@ def _render_executive_reading_card(insights, context, comparison):
         f"<span>{html.escape(insight)}</span></div>"
         for insight in clean_insights
     )
-    conclusion = _executive_conclusion(comparison)
+    conclusion = _executive_conclusion(comparison, alerts)
     card = (
         '<div class="executive-card">'
         '<div class="executive-title">Lectura ejecutiva</div>'
@@ -887,21 +887,104 @@ def _comparison_subtitle(context):
     )
 
 
-def _executive_conclusion(comparison):
+def _executive_conclusion(comparison, alerts=None):
     if not comparison:
         return "No hay datos suficientes para concluir sobre la comparación seleccionada."
+
+    initial = comparison.get("initial", {})
     final = comparison.get("final", {})
     delta = comparison.get("delta", {})
+
     result = _num_or_nan(final.get("utilidad_perdida_ejercicio"))
+    result_delta = _num_or_nan(delta.get("utilidad_perdida_ejercicio"))
     margin_delta = _num_or_nan(comparison.get("margin_delta_pp"))
-    expenses_delta = _num_or_nan(delta.get("gastos_administracion_ventas"))
-    if result >= 0 and margin_delta >= 0 and expenses_delta <= 0:
-        return "El período muestra mejora operacional, resultado positivo y gastos contenidos."
-    if result >= 0 and expenses_delta > 0:
-        return "El período muestra resultado positivo, aunque con presión al alza en gastos."
-    if result >= 0:
-        return "El período mantiene resultado positivo, con desempeño operativo favorable."
-    return "El período requiere revisión ejecutiva por resultado final negativo o deterioro operativo."
+
+    ingresos_initial = _num_or_nan(initial.get("ingresos_explotacion"))
+    ingresos_final = _num_or_nan(final.get("ingresos_explotacion"))
+    ingresos_change = _safe_div(
+        ingresos_final - ingresos_initial,
+        abs(ingresos_initial),
+    )
+
+    gastos_initial = abs(
+        _num_or_nan(initial.get("gastos_administracion_ventas"))
+    )
+    gastos_final = abs(
+        _num_or_nan(final.get("gastos_administracion_ventas"))
+    )
+    gastos_change = _safe_div(
+        gastos_final - gastos_initial,
+        gastos_initial,
+    )
+
+    margen_mejora = not pd.isna(margin_delta) and margin_delta > 0
+    ingresos_caen = not pd.isna(ingresos_change) and ingresos_change < 0
+    gastos_suben = not pd.isna(gastos_change) and gastos_change > 0
+    gastos_suben_fuerte = not pd.isna(gastos_change) and gastos_change > 0.20
+    resultado_positivo = not pd.isna(result) and result >= 0
+    resultado_deteriorado = (
+        resultado_positivo
+        and not pd.isna(result_delta)
+        and result_delta < 0
+    )
+    alertas_activas = alerts is not None and not alerts.empty
+
+    fortalezas = []
+    riesgos = []
+
+    if margen_mejora:
+        fortalezas.append("una mejora en el margen porcentual")
+    if resultado_positivo:
+        fortalezas.append(
+            "un resultado final positivo, pero deteriorado respecto de la base"
+            if resultado_deteriorado
+            else "un resultado final positivo"
+        )
+
+    if ingresos_caen:
+        riesgos.append("la caída de ingresos")
+    if gastos_suben_fuerte:
+        riesgos.append("el fuerte aumento de gastos de administración y ventas")
+    elif gastos_suben:
+        riesgos.append("el aumento de gastos de administración y ventas")
+    if not resultado_positivo:
+        riesgos.append("el resultado final negativo")
+
+    if fortalezas and riesgos:
+        verbo_riesgo = "presionan" if len(riesgos) > 1 else "presiona"
+        conclusion = (
+            f"El período muestra {_join_conclusion_items(fortalezas)}; "
+            f"sin embargo, {_join_conclusion_items(riesgos)} "
+            f"{verbo_riesgo} el desempeño financiero."
+        )
+    elif riesgos:
+        conclusion = (
+            f"El período requiere revisión por "
+            f"{_join_conclusion_items(riesgos)}."
+        )
+    elif fortalezas:
+        conclusion = (
+            f"El período presenta {_join_conclusion_items(fortalezas)}, "
+            "sin señales adversas relevantes en la comparación."
+        )
+    else:
+        conclusion = (
+            "La comparación no permite concluir una mejora financiera "
+            "suficientemente clara."
+        )
+
+    if alertas_activas or riesgos:
+        conclusion += (
+            " Se recomienda revisar estructura de gastos, recuperación "
+            "de ingresos y presión de liquidez."
+        )
+    return conclusion
+
+
+def _join_conclusion_items(items):
+    if len(items) <= 1:
+        return items[0] if items else ""
+    return ", ".join(items[:-1]) + " y " + items[-1]
 
 
 def _severity_key(severity):
@@ -1489,7 +1572,12 @@ else:
     st.info("Selecciona una comparación disponible para ver tarjetas ejecutivas.")
 
 
-_render_executive_reading_card(lectura_ejecutiva, comparison_context, comparison_values)
+_render_executive_reading_card(
+    lectura_ejecutiva,
+    comparison_context,
+    comparison_values,
+    alertas_financieras,
+)
 
 section_title("Alertas financieras")
 st.markdown(
